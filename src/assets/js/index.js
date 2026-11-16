@@ -44,7 +44,7 @@ import ArrowBallAnimator from "./arrow-ball-animator.js";
 import ArrowPathAnimator from "./arrow-path-animator.js";
 import tabletArrowAnimator from "./tabletArrowAnimator.js";
 import Accordion from "./accordion.js";
-import { initMobileMenu, initModals } from "./modals.js";
+import { initMobileMenu } from "./modals.js";
 import FormValidator from "./formValidator.js";
 
 const params = window
@@ -164,7 +164,7 @@ const App = {
         this.initTabletAnimator();
         this.initAccordion();
         this.initMobileMenu();
-        initModals();
+
         this.initFormValidation();
     },
 

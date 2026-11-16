@@ -5,6 +5,24 @@ const pages = fs.readdirSync(path.resolve(__dirname, 'src')).filter(fileName => 
 const postHtmlInclude = require('posthtml-include');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+// Use the same standalone handler in static pages and in the WordPress theme.
+// Inline it before any buttons are parsed, without waiting for the app bundle.
+class ModalFormsPlugin {
+    apply(compiler) {
+        compiler.hooks.compilation.tap('ModalFormsPlugin', compilation => {
+            const sourcePath = path.resolve(__dirname, 'src/assets/js/modal-forms.js');
+            compilation.fileDependencies.add(sourcePath);
+            HtmlWebpackPlugin.getHooks(compilation).beforeEmit.tap('ModalFormsPlugin', data => {
+                const script = fs.readFileSync(sourcePath, 'utf8');
+                data.html = data.html.replace(/<head>/i, () =>
+                    '<head>\n<script id="blp-modal-forms">\n' + script + '\n</script>');
+                return data;
+            });
+        });
+    }
+}
 
 module.exports = (env, argv) => {
     const isProduction = argv.mode === 'production';
@@ -104,6 +122,10 @@ module.exports = (env, argv) => {
             ],
         },
         plugins: [
+            new ModalFormsPlugin(),
+            new CopyWebpackPlugin({ patterns: [
+                { from: 'src/assets/js/modal-forms.js', to: 'js/modal-forms.js' }
+            ] }),
             new MiniCssExtractPlugin({
                 filename: 'css/[name].css',
             }),
